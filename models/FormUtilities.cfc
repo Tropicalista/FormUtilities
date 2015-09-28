@@ -95,14 +95,14 @@ Copyright 2007 Brian Kotek
 					<!--- If there is a temp element defined, means this field is an array or struct. --->
 					<cfif not StructKeyExists(local.currentElement, local.tempElement)>
 
-						<!--- If tempIndex is 0, it's a Struct, otherwise an Array. --->
-						<cfif local.tempIndex eq 0>
-							<cfset local.currentElement[local.tempElement] = StructNew() />
-						<cfelse>
+						<!--- If tempIndex is numeric, it's an Array, otherwise an Struct. --->
+						<cfif IsNumeric(local.tempIndex) >
 							<cfset local.currentElement[local.tempElement] = ArrayNew(1) />
+						<cfelse>
+							<cfset local.currentElement[local.tempElement] = StructNew() />
 						</cfif>	
 					</cfif>	
-					
+
 					<!--- If this is the last element defined by dots in the form field name, assign the form field value to the variable. --->
 					<cfif local.delimiterCounter eq ListLen(local.thisField, '.')>
 
