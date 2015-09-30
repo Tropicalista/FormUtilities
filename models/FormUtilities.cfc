@@ -68,7 +68,11 @@ Copyright 2007 Brian Kotek
 		<cfloop collection="#arguments.formScope#" item="local.thisField">
 			<cfif arguments.cleanFields>
 				<!--- protect from cross site scripting --->
-				<cfset arguments.formScope[local.thisField] = htmlEditFormat( arguments.formScope[local.thisField] ) /> 
+				<cfif isStruct(arguments.formscope[local.thisField])>
+					<cfset arguments.formScope[local.thisField] = htmlEditFormat(serializeJson(arguments.formscope[local.thisField])) />
+				<cfelse>
+					<cfset arguments.formScope[local.thisField] = htmlEditFormat( arguments.formScope[local.thisField] ) />
+				</cfif>
 			</cfif>
 			<cfset local.thisField = Trim(local.thisField) />
 
