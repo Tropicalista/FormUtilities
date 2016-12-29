@@ -7,15 +7,15 @@
     "createPackageDirectory":true,
     "packageDirectory":"",
     "homepage":"https://github.com/Tropicalista/FormUtilities",
-    "documentation":"http://wiki.coldbox.org",
+    "documentation":"https://github.com/Tropicalista/FormUtilities",
     "repository":{
         "type":"git",
         "url":"https://github.com/Tropicalista/FormUtilities"
     },
-    "bugs":"",
+    "bugs":"https://github.com/Tropicalista/FormUtilities/issues",
     "slug":"formutilities",
     "shortDescription":"A coldbox module that wrap Brian Kotek form utilities plugin",
-    "description":"",
+    "description":"This module can handle form array",
     "instructions":"",
     "changelog":"",
     "type":"modules",
