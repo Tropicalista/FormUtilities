@@ -49,10 +49,10 @@ component{
 		local.tempStruct = StructNew();
 		local.tempStruct['formCollectionsList'] = "";
 		
-		// Loop over the form scope. --->
+		// Loop over the form scope.
 		cfloop (collection="#arguments.formScope#" item="local.thisField"){
 			if( arguments.cleanFields ){
-				// protect from cross site scripting --->
+				// protect from cross site scripting
 				if( isStruct(arguments.formscope[local.thisField]) ){
 					arguments.formScope[local.thisField] = htmlEditFormat(serializeJson(arguments.formscope[local.thisField]));
 				}else{
@@ -61,30 +61,30 @@ component{
 			}
 			local.thisField = Trim(local.thisField);
 
-			// If the field has a dot or a bracket... --->
+			// If the field has a dot or a bracket...
 			if( hasFormCollectionSyntax(local.thisField) ){
 
-				// Add collection to list if not present. --->
+				// Add collection to list if not present.
 				local.tempStruct['formCollectionsList'] = addCollectionNameToCollectionList(local.tempStruct['formCollectionsList'], local.thisField);
 
 				local.currentElement = local.tempStruct;
 
-				// Loop over the field using . as the delimiter. --->
+				// Loop over the field using . as the delimiter.
 				local.delimiterCounter = 1;
 				cfloop(list="#local.thisField#" delimiters="." index="local.thisElement"){
 					local.tempElement = local.thisElement;
 					local.tempIndex = 0;
 
-					// If the current piece of the field has a bracket, determine the index and the element name. --->
+					// If the current piece of the field has a bracket, determine the index and the element name.
 					if( local.tempElement contains "[" ){
 						local.tempIndex = ReReplaceNoCase(local.tempElement, '.+\[|\]', '', 'all');
 						local.tempElement = ReReplaceNoCase(local.tempElement, '\[.+\]', '', 'all');
 					}
 
-					// If there is a temp element defined, means this field is an array or struct. --->
+					// If there is a temp element defined, means this field is an array or struct.
 					if( not StructKeyExists(local.currentElement, local.tempElement) ){
 
-						// If tempIndex is numeric, it's an Array, otherwise an Struct. --->
+						// If tempIndex is numeric, it's an Array, otherwise an Struct.
 						if( IsNumeric(local.tempIndex) ){
 							local.currentElement[local.tempElement] = ArrayNew(1);
 						}else{
@@ -92,7 +92,7 @@ component{
 						}	
 					}	
 
-					// If this is the last element defined by dots in the form field name, assign the form field value to the variable. --->
+					// If this is the last element defined by dots in the form field name, assign the form field value to the variable.
 					if( local.delimiterCounter eq ListLen(local.thisField, '.') ){
 
 						if( local.tempIndex eq 0 ){
@@ -109,7 +109,7 @@ component{
 							local.currentElement = local.currentElement[local.tempElement];
 						}else{
 							
-							// If we're on CF8, leverage the ArrayIsDefined() function to avoid throwing costly exceptions. --->
+							// If we're on CF8, leverage the ArrayIsDefined() function to avoid throwing costly exceptions.
 							if( server.coldfusion.productName eq "ColdFusion Server" and ListFirst(server.coldfusion.productVersion) gte 8 ){
 								
 								if( ArrayIsEmpty(local.currentElement[local.tempElement]) 
@@ -120,7 +120,7 @@ component{
 								
 							}else{
 							
-								// Otherwise it's an Array, so we have to catch array element undefined errors and set them to new Structs. --->
+								// Otherwise it's an Array, so we have to catch array element undefined errors and set them to new Structs.
 								try{
 									local.currentElement[local.tempElement][local.tempIndex];
 								}catch(any e){
@@ -129,7 +129,7 @@ component{
 							
 							}
 							
-							// Make the next element the current element for the next loop iteration. --->
+							// Make the next element the current element for the next loop iteration.
 							local.currentElement = local.currentElement[local.tempElement][local.tempIndex];
 
 						}
@@ -140,7 +140,7 @@ component{
 			}
 		}
 		
-		// Done looping. If we've been set to update the form scope, append the created form collections to the form scope. --->
+		// Done looping. If we've been set to update the form scope, append the created form collections to the form scope.
 		if( arguments.updateFormScope ){
 			StructAppend(arguments.formScope, local.tempStruct);
 		}
