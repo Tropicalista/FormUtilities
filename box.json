@@ -1,11 +1,11 @@
 {
     "name":"FormUtilities",
-    "version":"1.0.1",
+    "version":"1.0.2",
+    "location":"Tropicalista/FormUtilitiesv#1.0.2",
     "author":"Francesco Pepe",
-    "location":"https://github.com/Tropicalista/FormUtilities",
-    "directory":"",
-    "createPackageDirectory":true,
-    "packageDirectory":"",
+    "slug":"formutilities",
+    "type":"modules",
+    "keywords":"form, form utilities",
     "homepage":"https://github.com/Tropicalista/FormUtilities",
     "documentation":"https://github.com/Tropicalista/FormUtilities",
     "repository":{
@@ -13,31 +13,10 @@
         "url":"https://github.com/Tropicalista/FormUtilities"
     },
     "bugs":"https://github.com/Tropicalista/FormUtilities/issues",
-    "slug":"formutilities",
     "shortDescription":"A coldbox module that wrap Brian Kotek form utilities plugin",
-    "description":"This module can handle form array",
-    "instructions":"",
-    "changelog":"",
-    "type":"modules",
-    "keywords":"form, form utilities",
-    "private":false,
-    "engines":[
-        {
-            "type":"railo",
-            "version":">4.1"
-        },
-        {
-            "type":"adobe",
-            "version":">9.02"
-        }
-    ],
-    "defaultEngine":"",
-    "defaultPort":0,
-    "projectURL":"",
-    "license":[
-        {
-            "type":"Apache2",
-            "url":"http://www.apache.org/licenses/LICENSE-2.0.html"
-        }
-    ]
+    "scripts":{
+        "postVersion":"package set location='Tropicalista/FormUtilitiesv#`package version`'",
+        "onRelease":"publish",
+        "postPublish":"!git push --follow-tags"
+    }
 }
