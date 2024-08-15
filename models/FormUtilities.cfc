@@ -20,7 +20,7 @@ component{
 		local.results.removedList = "";
 		local.results.sameList = "";
 		
-		cfloop( list="#arguments.originalList#" index="local.thisItem"){
+		cfloop( list="#arguments.originalList#", index="local.thisItem"){
 			if( ListFindNoCase(arguments.newList, local.thisItem) ){
 				local.results.sameList = ListAppend(local.results.sameList, local.thisItem);
 			}else{
@@ -28,7 +28,7 @@ component{
 			}
 		}
 		
-		cfloop( list="#arguments.newList#" index="local.thisItem"){
+		cfloop( list="#arguments.newList#", index="local.thisItem"){
 			if( not ListFindNoCase(arguments.originalList, local.thisItem) ){
 				local.results.addedList = ListAppend(local.results.addedList, local.thisItem);
 			}
@@ -50,7 +50,7 @@ component{
 		local.tempStruct['formCollectionsList'] = "";
 		
 		// Loop over the form scope.
-		cfloop (collection="#arguments.formScope#" item="local.thisField"){
+		cfloop (collection="#arguments.formScope#", item="local.thisField"){
 			if( arguments.cleanFields ){
 				// protect from cross site scripting
 				if( isStruct(arguments.formscope[local.thisField]) ){
@@ -71,7 +71,7 @@ component{
 
 				// Loop over the field using . as the delimiter.
 				local.delimiterCounter = 1;
-				cfloop(list="#local.thisField#" delimiters="." index="local.thisElement"){
+				cfloop(list="#local.thisField#", delimiters=".", index="local.thisElement"){
 					local.tempElement = local.thisElement;
 					local.tempIndex = 0;
 
