@@ -18,5 +18,12 @@
         "postVersion":"package set location='Tropicalista/FormUtilitiesv#`package version`'",
         "onRelease":"publish",
         "postPublish":"!git push --follow-tags"
+    },
+    "dependencies":{},
+    "installPaths":{
+        "testbox":"testbox/"
+    },
+    "devDependencies":{
+        "testbox":"^5.4.0+7"
     }
 }

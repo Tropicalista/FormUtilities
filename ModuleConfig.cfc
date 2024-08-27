@@ -71,7 +71,7 @@ component {
 
 		// module settings - stored in modules.name.settings
 		settings = {
-
+            "autoParse": true
 		};
 
 		// Custom Declared Points
