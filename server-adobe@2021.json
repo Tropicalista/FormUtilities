@@ -5,17 +5,17 @@
     },
     "web":{
         "http":{
-            "port":"60299"
+            "port":"60399"
         },
         "rewrites":{
             "enable":"true"
         }
     },
     "openBrowser":"false",
-	"cfconfig": {
-		"file" : ".cfconfig.json"
-	},
-    "scripts" : {
+    "cfconfig":{
+        "file":".cfconfig.json"
+    },
+    "scripts":{
         "onServerInstall":"cfpm install debugger"
     }
 }

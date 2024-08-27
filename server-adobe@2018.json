@@ -12,7 +12,7 @@
         }
     },
     "openBrowser":"false",
-	"cfconfig": {
-		"file" : ".cfconfig.json"
-	}
+    "cfconfig":{
+        "file":".cfconfig.json"
+    }
 }

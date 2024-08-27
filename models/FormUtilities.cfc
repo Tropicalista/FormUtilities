@@ -96,7 +96,7 @@ component {
 
 		// Done looping. If we've been set to update the form scope, append the created form collections to the form scope.
 		if ( arguments.updateFormScope ) {
-			arguments.formScope.append( output );
+			arguments.formScope.append( output, true );
 		}
 
 		return output;

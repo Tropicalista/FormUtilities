@@ -30,14 +30,14 @@ component extends="testbox.system.BaseSpec" {
 		 * @skip     A flag that tells TestBox to skip this suite group from testing if true
 		 * @focused A flag that tells TestBox to only run this suite and no other
 		 */
-		describe( "FormUtils Spec", () => {
+		describe( "FormUtils Spec", function() {
 
 			/**
 			 * --------------------------------------------------------------------------
 			 * Runs before each spec in THIS suite group or nested groups
 			 * --------------------------------------------------------------------------
 			 */
-			beforeEach( () => {
+			beforeEach( function() {
 				model = new root.models.FormUtilities();
 			} );
 
@@ -46,7 +46,7 @@ component extends="testbox.system.BaseSpec" {
 			 * Runs after each spec in THIS suite group or nested groups
 			 * --------------------------------------------------------------------------
 			 */
-			afterEach( () => {
+			afterEach( function() {
 			} );
 
 			/**
@@ -62,11 +62,11 @@ component extends="testbox.system.BaseSpec" {
 			 * @data   A struct of data you would like to bind into the spec so it can be later passed into the executing body function
 			 * @focused A flag that tells TestBox to only run this spec and no other
 			 */
-			it( "can be created", () => {
+			it( "can be created", function() {
 				expect( model ).toBeComponent();
 			} );
 
-            it( "can build form collections", () => {
+            it( "can build form collections", function() {
 				
                 var rc = {
                     // should be ignored
@@ -105,8 +105,7 @@ component extends="testbox.system.BaseSpec" {
                     "order[2].item[1].quantity": "4",
                     // Badly formed
                     "badly[formed": "This is badly formed",
-                    "movies[3][director]xx": "I Should Not Be Here",
-
+                    "movies[3][director]xx": "I Should Not Be Here"
                 };
 
                 var validFormCollections = [ "address", "phone", "music", "movies", "food", "order" ];
@@ -160,6 +159,53 @@ component extends="testbox.system.BaseSpec" {
                 expect( result._formCollectionErrors.find( "movies[3][director]xx" ) ).toBeTrue();
 
 			} );
+
+            it( "can replace the form scope", function() {
+
+                var rc = {
+                    "name": "Dave", 
+                    // Simple Struct
+                    "address.street": "1234 Elm St",
+                    "address.city": "Springfield",
+                    "address.state": "IL",
+                    "address.zip": "62701",
+                    // simple array
+                    "phone[1]": "217-555-1212",
+                    "phone[2]": "217-555-3434",
+                    "phone[3]": "217-555-5656"
+                };
+
+                var result = model.buildFormCollections( rc, true );
+
+                debug( result );
+
+                expect( rc ).toHaveKey( "address,phone" );
+                expect( rc.address ).toBeStruct();
+                expect( rc.phone ).toBeArray();
+
+            } );
+
+
+            it( "can not update the form scope", function() {
+
+                var rc = {
+                    "name": "Dave", 
+                    // Simple Struct
+                    "address.street": "1234 Elm St",
+                    "address.city": "Springfield",
+                    "address.state": "IL",
+                    "address.zip": "62701",
+                    // simple array
+                    "phone[1]": "217-555-1212",
+                    "phone[2]": "217-555-3434",
+                    "phone[3]": "217-555-5656"
+                };
+
+                var result = model.buildFormCollections( rc, false );
+
+                expect( rc ).notToHaveKey( "address,phone" );
+
+            } );
 
 		} );
 	}

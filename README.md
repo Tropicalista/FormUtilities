@@ -123,7 +123,7 @@ The `buildFormCollections()` method returns a struct with the following importan
 
 ### Canonicalize Form Fields
 
-When the parser builds structures and arrays, it automatically trims and [canonicalizes[(https://cfdocs.org/canonicalize)] the field values.  It will not canonicalize regular form fields that aren't part of a structure or array, so you will need to take care of that yourself.
+When the parser builds structures and arrays, it automatically trims and [canonicalizes](https://cfdocs.org/canonicalize) the field values.  It will not canonicalize regular form fields that aren't part of a structure or array, so you will need to take care of that yourself.
 
 ### Utility Methods
 
