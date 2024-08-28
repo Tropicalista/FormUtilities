@@ -1,163 +1,171 @@
-component{
-	
-	public function init( boolean updateFormScope=false,
-						boolean trimFields=true,
-						boolean cleanFields=true
-		)
-	{
+component {
 
-		variables.instance.updateFormScope = arguments.updateFormScope;
-		variables.instance.trimFields = arguments.trimFields;
-		variables.instance.cleanFields = arguments.cleanFields;
+	any function init( boolean updateFormScope = true ) {
+		variables.updateFormScope = arguments.updateFormScope;
 		return this;
 	}
-	
-	public struct function compareLists(required any originalList, required any newList){
-		var local = StructNew();
-		
-		local.results = StructNew();
-		local.results.addedList = "";
-		local.results.removedList = "";
-		local.results.sameList = "";
-		
-		cfloop( list="#arguments.originalList#", index="local.thisItem"){
-			if( ListFindNoCase(arguments.newList, local.thisItem) ){
-				local.results.sameList = ListAppend(local.results.sameList, local.thisItem);
-			}else{
-				local.results.removedList = ListAppend(local.results.removedList, local.thisItem);
-			}
-		}
-		
-		cfloop( list="#arguments.newList#", index="local.thisItem"){
-			if( not ListFindNoCase(arguments.originalList, local.thisItem) ){
-				local.results.addedList = ListAppend(local.results.addedList, local.thisItem);
-			}
-		}
-		
-		return local.results;
-	}
-	
-	public any function buildFormCollections(
-			required struct formScope,
-			required boolean updateFormScope="#variables.instance.updateFormScope#",
-			required boolean trimFields="#variables.instance.trimFields#",
-			required boolean cleanFields="#variables.instance.cleanFields#"
-		){
 
-		var local = StructNew();
-		
-		local.tempStruct = StructNew();
-		local.tempStruct['formCollectionsList'] = "";
-		
-		// Loop over the form scope.
-		cfloop (collection="#arguments.formScope#", item="local.thisField"){
-			if( arguments.cleanFields ){
-				// protect from cross site scripting
-				if( isStruct(arguments.formscope[local.thisField]) ){
-					arguments.formScope[local.thisField] = htmlEditFormat(serializeJson(arguments.formscope[local.thisField]));
-				}else{
-					arguments.formScope[local.thisField] = htmlEditFormat( arguments.formScope[local.thisField] );
-				}
-			}
-			local.thisField = Trim(local.thisField);
+	/**
+	 * BuildFormCollections
+	 * Converts a flat form scope into structs and arrays based on the field names.
+	 *
+	 * @formScope
+	 * @updateFormScope
+	 */
+	any function buildFormCollections(
+		required struct formScope,
+		boolean updateFormScope = variables.updateFormScope
+	){
+		var output = {
+			"_formCollections" : [],
+			"_formCollectionErrors" : []
+		};
+
+		// loop through each field in the form scope
+        for ( var field in arguments.formScope ) {
+			
+            field = trim( field );
 
 			// If the field has a dot or a bracket...
-			if( hasFormCollectionSyntax(local.thisField) ){
+			if ( hasFormCollectionSyntax( field ) ) {
+				
+                // Validate field name before processing. It needs to match specific pattern(s)
+				if ( !isValidFieldName( field ) ) {
+					// Log the error and skip processing this field
+					output["_formCollectionErrors"].append( field );
+					continue;
+				}
+                
+                // Add collection to list if not present.
+				appendToFormCollections( output, field );
 
-				// Add collection to list if not present.
-				local.tempStruct['formCollectionsList'] = addCollectionNameToCollectionList(local.tempStruct['formCollectionsList'], local.thisField);
+				var currentElement = output;
 
-				local.currentElement = local.tempStruct;
+				// Use regex to split the key into parts, recognizing both dot and bracket notations.
+				var keyParts = reMatch( "[^.\[\]]+", field );
 
-				// Loop over the field using . as the delimiter.
-				local.delimiterCounter = 1;
-				cfloop(list="#local.thisField#", delimiters=".", index="local.thisElement"){
-					local.tempElement = local.thisElement;
-					local.tempIndex = 0;
+				for ( var i = 1; i <= keyParts.len(); i++ ) {
+					var tempElement = keyParts[ i ];
+					var tempIndex = 0;
 
-					// If the current piece of the field has a bracket, determine the index and the element name.
-					if( local.tempElement contains "[" ){
-						local.tempIndex = ReReplaceNoCase(local.tempElement, '.+\[|\]', '', 'all');
-						local.tempElement = ReReplaceNoCase(local.tempElement, '\[.+\]', '', 'all');
+					// If the next character is a number, determine the index
+					if ( i < keyParts.len() && reFind( "^\d+$", keyParts[ i + 1 ] ) ) {
+						tempIndex = keyParts[ i + 1 ];
+
+                        // Check if the index is 0, if so, log error and skip processing
+                        if ( tempIndex == "0" ) {
+                            output._formCollectionErrors.append( field );
+                            break;
+                        }
+
+						i++; // Skip the index part in the next loop iteration
 					}
 
 					// If there is a temp element defined, means this field is an array or struct.
-					if( not StructKeyExists(local.currentElement, local.tempElement) ){
-
-						// If tempIndex is numeric, it's an Array, otherwise an Struct.
-						if( IsNumeric(local.tempIndex) ){
-							local.currentElement[local.tempElement] = ArrayNew(1);
-						}else{
-							local.currentElement[local.tempElement] = StructNew();
-						}	
-					}	
+					if ( !currentElement.keyExists( tempElement ) ) {
+						// If tempIndex is numeric, it's an Array, otherwise a Struct.
+						currentElement[ tempElement ] = ( tempIndex == 0 ) ? {} : [];
+					}
 
 					// If this is the last element defined by dots in the form field name, assign the form field value to the variable.
-					if( local.delimiterCounter eq ListLen(local.thisField, '.') ){
-
-						if( local.tempIndex eq 0 ){
-							local.currentElement[local.tempElement] = arguments.formScope[local.thisField];
-						}else{
-							local.currentElement[local.tempElement][local.tempIndex] = arguments.formScope[local.thisField];
-						}	
-
-					// Otherwise, keep going through the field name looking for more structs or arrays.
-					}else{
-						
-						// If this field was a Struct, make the next element the current element for the next loop iteration.
-						if( local.tempIndex eq 0 ){
-							local.currentElement = local.currentElement[local.tempElement];
-						}else{
-							
-							// If we're on CF8, leverage the ArrayIsDefined() function to avoid throwing costly exceptions.
-							if( server.coldfusion.productName eq "ColdFusion Server" and ListFirst(server.coldfusion.productVersion) gte 8 ){
-								
-								if( ArrayIsEmpty(local.currentElement[local.tempElement]) 
-										or ArrayLen(local.currentElement[local.tempElement]) lt local.tempIndex
-										or not ArrayIsDefined(local.currentElement[local.tempElement], local.tempIndex ) ){
-									local.currentElement[local.tempElement][local.tempIndex] = StructNew();
-								}
-								
-							}else{
-							
-								// Otherwise it's an Array, so we have to catch array element undefined errors and set them to new Structs.
-								try{
-									local.currentElement[local.tempElement][local.tempIndex];
-								}catch(any e){
-										local.currentElement[local.tempElement][local.tempIndex] = StructNew();
-								}
-							
-							}
-							
-							// Make the next element the current element for the next loop iteration.
-							local.currentElement = local.currentElement[local.tempElement][local.tempIndex];
-
+					if ( i == keyParts.len() ) {
+						if ( tempIndex == 0 ) {
+							currentElement[ tempElement ] = trim(
+								canonicalize( arguments.formScope[ field ], true, true )
+							);
+						} else {
+							currentElement[ tempElement ][ tempIndex ] = trim(
+								canonicalize( arguments.formScope[ field ], true, true )
+							);
 						}
-						local.delimiterCounter = local.delimiterCounter + 1;
+					} else {
+						// Keep traversing the structure
+						if ( tempIndex == 0 ) {
+							currentElement = currentElement[ tempElement ];
+						} else {
+							if ( !arrayIsDefined( currentElement[ tempElement ], tempIndex ) ) {
+								currentElement[ tempElement ][ tempIndex ] = {};
+							}
+							currentElement = currentElement[ tempElement ][ tempIndex ];
+						}
+
 					}
-					
 				}
 			}
 		}
-		
+
 		// Done looping. If we've been set to update the form scope, append the created form collections to the form scope.
-		if( arguments.updateFormScope ){
-			StructAppend(arguments.formScope, local.tempStruct);
+		if ( arguments.updateFormScope ) {
+			arguments.formScope.append( output, true );
 		}
 
-		return local.tempStruct;
+		return output;
 	}
-	
-	private string function hasFormCollectionSyntax(required any fieldName){
-		return arguments.fieldName contains "." or arguments.fieldName contains "[";
-	}
-	
-	private string function addCollectionNameToCollectionList(required string formCollectionsList, required string fieldName){
 
-		if (not ListFindNoCase( arguments.formCollectionsList, ReReplaceNoCase( arguments.fieldName, '(\.|\[).+', '') ) ){
-			arguments.formCollectionsList = ListAppend(arguments.formCollectionsList, ReReplaceNoCase(arguments.fieldName, '(\.|\[).+', ''));
+    /**
+     * Compare Lists
+     * Given two versions of a list, I return a struct containing the values that were added, the values that were removed, and the values that stayed the same.
+     *
+     * @fieldName 
+     */
+    struct function compareLists( 
+        required any originalList, 
+        required any newList
+    ){
+		var results = { added : [], removed : [], same : [] };
+
+		for ( var thisItem in arguments.originalList.ListToArray() ) {
+			if ( arguments.newList.ListFindNoCase( thisItem ) ) {
+				results.same.append( thisItem );
+			} else {
+				results.removed.append( thisItem );
+			}
 		}
-		return arguments.formCollectionsList;
+
+		for ( thisItem in arguments.newList.ListToArray() ) {
+			if ( !listFindNoCase( arguments.originalList, thisItem ) ) {
+				results.added.append( thisItem );
+			}
+		}
+
+		return results;
 	}
-	
+
+	/**
+	 * Checks if a field name contains form collection syntax.
+	 * @param fieldName String The form field name.
+	 * @return Boolean True if the field name contains collection syntax, false otherwise.
+	 */
+	private boolean function hasFormCollectionSyntax( required any fieldName ){
+		return arguments.fieldName contains "." || arguments.fieldName contains "[";
+	}
+
+	/**
+	 * Adds the collection name to the list of collection names if it isn't already there.
+	 * @param _formCollections String The existing list of collection names.
+	 * @param fieldName String The field name to add.
+	 * @return String The updated list of collection names.
+	 */
+	private void function appendToFormCollections(
+		required struct output,
+		required string fieldName
+	){
+		// sanitize the field name
+		var cleanFieldName = reReplaceNoCase( arguments.fieldName, "(\.|\[).+", "" );
+
+		if ( !arguments.output._formCollections.findNoCase( cleanFieldName ) ) {
+			arguments.output._formCollections.append( cleanFieldName );
+		}
+	}
+
+    /**
+	 * Validates if a field name follows the correct syntax.
+	 * @param fieldName String The form field name.
+	 * @return Boolean True if the field name is valid, false otherwise.
+	 */
+	private boolean function isValidFieldName(required string fieldName) {
+		// Valid field names contain only alphanumeric characters and underscores between dots or brackets
+		return reFind("^[a-zA-Z0-9_]+(\[\d*\]|\[[a-zA-Z0-9_]+\])*(\.[a-zA-Z0-9_]+)?(\[\d*\]|\[[a-zA-Z0-9_]+\])*(\.[a-zA-Z0-9_]+)*$", fieldName) > 0;
+	}
+
 }

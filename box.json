@@ -1,6 +1,6 @@
 {
     "name":"FormUtilities",
-    "version":"1.0.2",
+    "version":"2.0.0",
     "location":"Tropicalista/FormUtilitiesv#1.0.2",
     "author":"Francesco Pepe",
     "slug":"formutilities",
@@ -18,5 +18,12 @@
         "postVersion":"package set location='Tropicalista/FormUtilitiesv#`package version`'",
         "onRelease":"publish",
         "postPublish":"!git push --follow-tags"
+    },
+    "dependencies":{},
+    "installPaths":{
+        "testbox":"testbox/"
+    },
+    "devDependencies":{
+        "testbox":"^5.4.0+7"
     }
 }

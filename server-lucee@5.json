@@ -1,0 +1,18 @@
+{
+    "name":"formutilities-lucee@5",
+    "app":{
+        "cfengine":"lucee@5"
+    },
+    "web":{
+        "http":{
+            "port":"60399"
+        },
+        "rewrites":{
+            "enable":"true"
+        }
+    },
+    "openBrowser":"false",
+    "cfconfig":{
+        "file":".cfconfig.json"
+    }
+}
