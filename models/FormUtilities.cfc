@@ -70,13 +70,9 @@ component {
 					// If this is the last element defined by dots in the form field name, assign the form field value to the variable.
 					if ( i == keyParts.len() ) {
 						if ( tempIndex == 0 ) {
-							currentElement[ tempElement ] = trim(
-								canonicalize( arguments.formScope[ field ], true, true )
-							);
+							currentElement[ tempElement ] = trimAndCanonicalize( arguments.formScope[ field ] );
 						} else {
-							currentElement[ tempElement ][ tempIndex ] = trim(
-								canonicalize( arguments.formScope[ field ], true, true )
-							);
+							currentElement[ tempElement ][ tempIndex ] = trimAndCanonicalize( arguments.formScope[ field ] );
 						}
 					} else {
 						// Keep traversing the structure
@@ -167,5 +163,18 @@ component {
 		// Valid field names contain only alphanumeric characters and underscores between dots or brackets
 		return reFind("^[a-zA-Z0-9_]+(\[\d*\]|\[[a-zA-Z0-9_]+\])*(\.[a-zA-Z0-9_]+)?(\[\d*\]|\[[a-zA-Z0-9_]+\])*(\.[a-zA-Z0-9_]+)*$", fieldName) > 0;
 	}
+
+    /**
+     * Attempts to canonicalize a value. If the value is a simple value, it will be trimmed and canonicalized. Otherwise, it will be returned as is.
+     * Note: Lucee already processes form fields but has a different way of returning data and the fields are parsed before they reach this function.
+     * There's no way to turn this feature off AFAIK, therefore, we need to ignore anything in the form scope that isn't a simple value
+     * References: 
+     * https://docs.lucee.org/guides/cookbooks/Hidden_gems.html#example-3-passing-arguments-via-urlform-scopes-as-array
+     * https://dev.lucee.org/t/bug-issue-with-form-scope-array-bracket-notation-setting-to-disable/4088
+     * 
+     */
+    private function trimAndCanonicalize( required any value ) {
+        return ( isSimpleValue( value ) ? trim( canonicalize( trim( arguments.value ), true, true ) ) : arguments.value ); 
+    }
 
 }
