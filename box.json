@@ -15,6 +15,7 @@
     "bugs":"https://github.com/Tropicalista/FormUtilities/issues",
     "shortDescription":"A coldbox module that wrap Brian Kotek form utilities plugin",
     "scripts":{
+        "build:module":"task run taskFile=build/Build.cfc :projectName=`package show slug` :version=`package show version`",
         "postVersion":"package set location='Tropicalista/FormUtilitiesv#`package version`'",
         "onRelease":"publish",
         "postPublish":"!git push --follow-tags"
