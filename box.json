@@ -1,7 +1,7 @@
 {
     "name":"FormUtilities",
-    "version":"2.0.3",
-    "location":"ForgeboxStorage",
+    "version":"2.1.0",
+    "location":"Tropicalista/FormUtilitiesv#2.1.0",
     "author":"Francesco Pepe",
     "slug":"formutilities",
     "type":"modules",
@@ -14,6 +14,12 @@
     },
     "bugs":"https://github.com/Tropicalista/FormUtilities/issues",
     "shortDescription":"A coldbox module that wrap Brian Kotek form utilities plugin",
+    "ignore":[
+        "**/.*",
+        "test-harness",
+        "/server*.json",
+        "build"
+    ],
     "scripts":{
         "build:module":"task run taskFile=build/Build.cfc :projectName=`package show slug` :version=`package show version`",
         "postVersion":"package set location='Tropicalista/FormUtilitiesv#`package version`'",
