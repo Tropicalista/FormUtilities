@@ -20,7 +20,6 @@ testbox/*
 modules/*
 
 ## Docker build volume
-build/
 .vscode/
 
 ## app-specific
