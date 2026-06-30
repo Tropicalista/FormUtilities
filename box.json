@@ -16,7 +16,8 @@
     "shortDescription":"A coldbox module that wrap Brian Kotek form utilities plugin",
     "ignore":[
         "**/.*",
-        "test-harness",
+        "testbox",
+        "tests",
         "/server*.json",
         "build"
     ],
